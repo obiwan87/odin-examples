@@ -61,9 +61,9 @@ Point2D :: struct {
 
 
 create_random_points :: proc(n  : int = 10) {
-    for i in 0..<n {
-        x := rand.float32_uniform(0+CIRCLE_RADIUS, SCREEN_WIDTH -CIRCLE_RADIUS)
-        y := rand.float32_uniform(0+CIRCLE_RADIUS, SCREEN_HEIGHT - CIRCLE_RADIUS)
+    for i in 0 ..< n {
+        x := rand.float32_uniform(0 + CIRCLE_RADIUS, SCREEN_WIDTH - CIRCLE_RADIUS)
+        y := rand.float32_uniform(0 + CIRCLE_RADIUS, SCREEN_HEIGHT - CIRCLE_RADIUS)
         p := create_point(x, y)
         points[i] = p
     }
@@ -72,7 +72,7 @@ create_random_points :: proc(n  : int = 10) {
 create_colors :: proc(start: raylib.Color, end: raylib.Color, n : int) {
     using raylib
     colors = make([]Color, n)
-    for i in 0..<n {
+    for i in 0 ..< n {
         f := f32(i) / f32(n)
         colors[i] = Color {
 
@@ -88,7 +88,7 @@ create_random_colors :: proc(n : int) {
     using raylib
     colors = make([]Color, n)
 
-    for i in 0..<n {
+    for i in 0 ..< n {
         colors[i] = Color {
         r = cast(u8)rand.float32_uniform(0, 255),
         g = cast(u8)rand.float32_uniform(0, 255),
@@ -120,12 +120,12 @@ draw_frame :: proc () {
     BeginDrawing()
     ClearBackground(BLACK)
 
-    for y in 0..<SCREEN_HEIGHT {
-        for x in 0..<SCREEN_WIDTH {
+    for y in 0 ..< SCREEN_HEIGHT {
+        for x in 0 ..< SCREEN_WIDTH {
             current_point := create_point(f32(x), f32(y))
             // Find the closest point
             closest_point := points[0]
-            closest_distance := manhattan_distance(closest_point,current_point)
+            closest_distance := manhattan_distance(closest_point, current_point)
             closest_index := 0
             for point, color_index in points[1:] {
                 distance := manhattan_distance(point, current_point)
