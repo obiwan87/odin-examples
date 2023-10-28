@@ -7,10 +7,13 @@ import "vendor:raylib"
 import "core:os"
 import "core:fmt"
 import "core:strconv"
+import commons "../commons"
 
-points : []Point2D
+
+points : []commons.Point2D
 colors:  []raylib.Color
 main :: proc() {
+    using commons
     n : int
     if len(os.args) <= 1 {
         n = 20
@@ -24,10 +27,11 @@ main :: proc() {
         }
     }
 
-    points = make([]Point2D, n)
+    points = make([]commons.Point2D, n)
+    colors = make([]raylib.Color, n)
     defer delete(points)
-    create_random_points(n);
-    create_random_colors(n)
+    create_random_points(n, CIRCLE_RADIUS, CIRCLE_RADIUS, SCREEN_WIDTH - CIRCLE_RADIUS, SCREEN_HEIGHT - CIRCLE_RADIUS, &points)
+    create_random_colors(n, &colors)
 
     for point in points {
         fmt.println(point)
@@ -43,7 +47,7 @@ CIRCLE_RADIUS :: 10
 // Window management
 init_window :: proc() {
     using raylib
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Convex Hull")
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Voronoi")
     SetTargetFPS(60)
 
     for !WindowShouldClose() {
@@ -52,63 +56,13 @@ init_window :: proc() {
 }
 
 
-// Generation of random points
-
-Point2D :: struct {
-    x : f32,
-    y : f32,
-}
-
-
-create_random_points :: proc(n  : int = 10) {
-    for i in 0 ..< n {
-        x := rand.float32_uniform(0 + CIRCLE_RADIUS, SCREEN_WIDTH - CIRCLE_RADIUS)
-        y := rand.float32_uniform(0 + CIRCLE_RADIUS, SCREEN_HEIGHT - CIRCLE_RADIUS)
-        p := create_point(x, y)
-        points[i] = p
-    }
-}
-
-create_colors :: proc(start: raylib.Color, end: raylib.Color, n : int) {
-    using raylib
-    colors = make([]Color, n)
-    for i in 0 ..< n {
-        f := f32(i) / f32(n)
-        colors[i] = Color {
-
-        r = start.r + u8(f32(end.r) - f32(start.r) * f),
-        g = start.g + u8(f32(end.g) - f32(start.g) * f),
-        b = start.b + u8(f32(end.b) - f32(start.b) * f),
-        a = 255,
-        }
-    }
-}
-
-create_random_colors :: proc(n : int) {
-    using raylib
-    colors = make([]Color, n)
-
-    for i in 0 ..< n {
-        colors[i] = Color {
-        r = cast(u8)rand.float32_uniform(0, 255),
-        g = cast(u8)rand.float32_uniform(0, 255),
-        b = cast(u8)rand.float32_uniform(0, 255),
-        a = 255,
-        }
-    }
-}
-
-create_point :: proc(x : f32, y : f32) -> Point2D {
-    return Point2D { x, y }
-}
-
-euclidean_distance :: proc(a : Point2D, b : Point2D) -> f32 {
+euclidean_distance :: proc(a : commons.Point2D, b : commons.Point2D) -> f32 {
     delta_x := a.x - b.x
     delta_y := a.y - b.y
     return delta_x * delta_x + delta_y * delta_y
 }
 
-manhattan_distance :: proc(a : Point2D, b : Point2D) -> f32 {
+manhattan_distance :: proc(a : commons.Point2D, b : commons.Point2D) -> f32 {
     delta_x := math.abs(a.x - b.x)
     delta_y := math.abs(a.y - b.y)
     return delta_x + delta_y
@@ -117,6 +71,7 @@ manhattan_distance :: proc(a : Point2D, b : Point2D) -> f32 {
 
 draw_frame :: proc () {
     using raylib
+    using commons
     BeginDrawing()
     ClearBackground(BLACK)
 
