@@ -43,10 +43,10 @@ create_colors :: proc(start: raylib.Color, end: raylib.Color, n : int, colors: ^
         f := f32(i) / f32(n)
         colors[i] = Color {
 
-        r = start.r + u8(f32(end.r) - f32(start.r) * f),
-        g = start.g + u8(f32(end.g) - f32(start.g) * f),
-        b = start.b + u8(f32(end.b) - f32(start.b) * f),
-        a = 255,
+        start.r + u8(f32(end.r) - f32(start.r) * f),
+        start.g + u8(f32(end.g) - f32(start.g) * f),
+        start.b + u8(f32(end.b) - f32(start.b) * f),
+        255,
         }
     }
 }
@@ -56,10 +56,10 @@ create_random_colors :: proc(n : int, colors: ^[]raylib.Color) {
 
     for index in 0 ..< n {
         colors[index] = Color {
-        r = cast(u8)rand.float32_uniform(0, 255),
-        g = cast(u8)rand.float32_uniform(0, 255),
-        b = cast(u8)rand.float32_uniform(0, 255),
-        a = 255,
+        cast(u8)rand.float32_uniform(0, 255),
+        cast(u8)rand.float32_uniform(0, 255),
+        cast(u8)rand.float32_uniform(0, 255),
+        255,
         }
     }
 }

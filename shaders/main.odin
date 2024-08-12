@@ -4,8 +4,8 @@ import "core:fmt"
 import "core:math"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
-import "../commons/"
-
+import commons "../commons"
+import "vendor:raylib"
 import "core:math/rand"
 
 SCREEN_TITLE :: "GLFW"
@@ -15,7 +15,7 @@ SCREEN_HEIGHT :: 512
 // Set the viewport of OpenGL such that it covers the entire window.
 gl_reset_viewport :: proc "c" (window: glfw.WindowHandle) {
     w, h := glfw.GetFramebufferSize(window)
-    gl.Viewport(0, 0, w, h)
+    gl.Viewport(400, 400, SCREEN_WIDTH, SCREEN_HEIGHT)
 }
 
 cb_frame_buffer_size :: proc "c" (window: glfw.WindowHandle, width, height: i32) {
@@ -30,16 +30,16 @@ cb_key :: proc "c" (window: glfw.WindowHandle, key, scancode, action, mods: i32)
 
 main :: proc() {
 
-// Initialize GLFW.
-    if glfw.Init() != 1 {
+    if !glfw.Init() {
         fmt.println("Failed to initialize GLFW.")
         return
     }
     defer glfw.Terminate()
 
-    n := 50
+    n := 750
 
     points := make([]commons.Point2D, n)
+
     commons.create_random_points(n, 0, 0, 1., 1., &points)
 
     points_arr := make([]f32, 3 * n)
@@ -58,6 +58,7 @@ main :: proc() {
         fmt.println("Failed to create window.")
         return
     }
+
     defer glfw.DestroyWindow(window)
 
     // Use window in current context.
@@ -97,13 +98,13 @@ main :: proc() {
     // OpenGL use normalized coordinates that range between [-1, 1].
     vertices := [12]f32 {
     // 1st vertex
-    1.0, 1.0, 0.0,
-    // 2nd vertex
-    1.0, -1.0, 0.0,
-    // 3rd vertex
-    -1., -1., 0.0,
-    // 4th vertex
-    -1., 1., 0.0,
+        1.0, 1.0, 0.0,
+        // 2nd vertex
+        1.0, -1.0, 0.0,
+        // 3rd vertex
+        -1., -1., 0.0,
+        // 4th vertex
+        -1., 1., 0.0,
     };
     // Copy the coordinates above into the array buffer.
     // + GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
@@ -119,9 +120,9 @@ main :: proc() {
     // A list of vertex indices that are used to make the triangles.
     indices := [6]u32 {
     // First triangle
-    0, 1, 3,
-    // Second triangle
-    1, 2, 3,
+        0, 1, 3,
+        // Second triangle
+        1, 2, 3,
     }
     // Copy the indices into the buffer.
     gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
@@ -162,6 +163,7 @@ main :: proc() {
         points_location := gl.GetUniformLocation(shader_program, "points")
         resolution_location := gl.GetUniformLocation(shader_program, "resolution")
         time_value_location := gl.GetUniformLocation(shader_program, "time_value")
+
         width, height := glfw.GetWindowSize(window)
 
         // Clear screen with color. Pink: 0.9, 0.2, 0.8.
@@ -170,8 +172,8 @@ main :: proc() {
 
         for i := 0; i < n; i += 3 {
             direction := f32(i % 2 == 0? 1 : -1);
-            points_arr[3 * i] = points[i].x + math.sin(f32(time_value)) * 0.1 *direction;
-            points_arr[3 * i + 1] = points[i].y + math.cos(f32(time_value)) * 0.1*direction;
+            points_arr[3 * i] = points[i].x + 0.5 * math.sin(f32(time_value)) * 0.1 * direction;
+            points_arr[3 * i + 1] = points[i].y + 0.5 * math.cos(f32(time_value)) * 0.1 * direction;
             points_arr[3 * i + 2] = 0.
         }
 
@@ -182,6 +184,7 @@ main :: proc() {
 
         // Draw triangles.
         gl.UseProgram(shader_program)
+
         // Set the uniform value. This must be done after calling `gl.UseProgram`.
         gl.Uniform4f(vertex_color_location, 0.0, green_intensity, 0.0, 1.0)
         gl.Uniform3fv(points_location, i32(n), &points_arr[0])
